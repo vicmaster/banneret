@@ -1,16 +1,38 @@
 {
   "name": "banneret",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Portable sub-agent pipeline kit: canonical scout/verifier/cold-reader contracts and a function-staged pipeline playbook, compiled to Claude Code and Codex.",
   "type": "module",
-  "bin": { "banneret": "bin/banneret.js" },
-  "files": ["bin", "src", "agents", "playbook", "README.md", "LICENSE"],
+  "bin": {
+    "banneret": "bin/banneret.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "agents",
+    "playbook",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "test": "node --test"
   },
-  "engines": { "node": ">=20" },
-  "keywords": ["ai-agents", "subagents", "claude-code", "codex", "agents-md", "pipeline", "orchestration"],
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "ai-agents",
+    "subagents",
+    "claude-code",
+    "codex",
+    "agents-md",
+    "pipeline",
+    "orchestration"
+  ],
   "author": "Victor Velazquez (https://victorvelazquez.dev)",
   "license": "MIT",
-  "repository": { "type": "git", "url": "git+https://github.com/vicmaster/banneret.git" }
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vicmaster/banneret.git"
+  }
 }
