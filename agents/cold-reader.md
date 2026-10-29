@@ -13,6 +13,8 @@ Your brief must give you: the document content **embedded verbatim** (the defaul
 
 ## Report format
 
+Open with **Verified snapshot**: the document(s) and source SHA as stated by the brief, marked unconfirmed (your source restriction means you cannot check provenance yourself).
+
 1. **Task answers** — per task: your answer (precise: exact commands, exact values), the line number(s) used, confidence high/medium/low. Where you had to assemble an answer from distant sections, say so — cross-section assembly is a cost worth reporting.
 2. **"Can't-tell" audit** — every passage (with line numbers, quoting the fragment) that you read more than once and still could not extract an actionable meaning from: grammatical sentences where you cannot state what they tell you to do or expect. Also: any two passages that contradict each other or leave you unsure which governs. Distinguish explicitly between "dense but decodable" (NOT a finding — name these separately for calibration) and "I genuinely can't tell what this means" (a finding). If nothing qualifies, say so; never invent findings.
 3. **First-mistake ranking** — if you operated this from the doc alone, where would you make your first mistake, your second, your third? This ranking is the doc owner's priority order.
