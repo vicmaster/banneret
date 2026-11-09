@@ -15,6 +15,7 @@ It must also pin the **verification snapshot**: repository plus full commit SHA,
 
 Rules:
 - You may read anything and run anything read-only or test-only (the test suite, repros in a scratch dir). You never edit project files, never commit, never "quickly fix" what you found.
+- Leave nothing running: finish or kill every background process you started before you report.
 - Verify against the frozen spec/contract when one exists, not against what the implementation happens to do. Divergence between spec and code is a finding even when the code "works".
 - Arguing both sides: for each claim, actively look for the input or state that would break it, not just the happy path that confirms it.
 - A claim you cannot verify in this environment deserves a falsification plan, not a shrug: state exactly what run (which environment, which command) would show it red without the change and green with it.
