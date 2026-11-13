@@ -1,6 +1,6 @@
 {
   "name": "banneret",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Portable sub-agent pipeline kit: canonical scout/verifier/cold-reader contracts and a function-staged pipeline playbook, compiled to Claude Code and Codex.",
   "type": "module",
   "bin": {
