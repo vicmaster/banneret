@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>How banneret works</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --paper: #f5f5f5; --paper-2: #ececec; --ink: #2d3142; --muted: #4f5d75;
+      --soft: #7a8399; --rule: rgba(45,49,66,0.12); --accent: #eb6c36;
+      --accent-tint: rgba(235,108,54,0.08); --link: #2e5aa8;
+      --sans: 'Geist', system-ui, sans-serif; --serif: 'Instrument Serif', serif;
+      --mono: 'Geist Mono', ui-monospace, monospace;
+    }
+    body { min-height: 100vh; padding: 3rem 2rem; background: var(--paper); color: var(--ink); font-family: var(--sans); }
+    .container { width: 100%; max-width: 1200px; margin: 0 auto; }
+    .header { margin-bottom: 2.5rem; }
+    .eyebrow { margin-bottom: 0.5rem; color: var(--muted); font: 500 0.66rem var(--mono); letter-spacing: 0.18em; text-transform: uppercase; }
+    h1 { margin-bottom: 0.5rem; font: 400 clamp(1.75rem, 3vw + 1rem, 2.5rem)/1.1 var(--serif); letter-spacing: -0.02em; }
+    h2.fig { margin: 0 0 1rem; font: 400 1.5rem/1.2 var(--serif); letter-spacing: -0.01em; }
+    .subtitle { max-width: 62ch; color: var(--muted); font-size: 1rem; line-height: 1.55; }
+    section.figure { margin-top: 3rem; }
+    section.figure:first-of-type { margin-top: 0; }
+    .diagram-container { overflow-x: auto; padding: 1.5rem; background: var(--paper-2); border: 1px solid var(--rule); border-radius: 8px; }
+    svg { display: block; width: 100%; }
+    svg.lane { min-width: 1000px; }
+    svg.loop { max-width: 720px; min-width: 600px; margin: 0 auto; }
+    .lane-label { fill: var(--muted); font: 400 9px var(--mono); letter-spacing: 0.18em; }
+    .lane-note { fill: var(--soft); font: 400 8px var(--mono); }
+    .phase { fill: var(--muted); font: 500 8px var(--mono); letter-spacing: 0.14em; text-anchor: middle; }
+    .node-name { fill: var(--ink); font: 600 12px var(--sans); text-anchor: middle; }
+    .focal-name { fill: var(--accent); }
+    .sublabel { fill: var(--soft); font: 400 8px var(--mono); text-anchor: middle; }
+    .arrow-label { fill: var(--soft); font: 400 8px var(--mono); letter-spacing: 0.06em; text-anchor: middle; }
+    .arrow-label.accent { fill: var(--accent); }
+    .legend-text { fill: var(--muted); font: 400 8px var(--sans); }
+    .flow { fill: none; stroke: var(--muted); stroke-width: 1.2; }
+    .flow.optional { stroke-dasharray: 5 4; }
+    .flow.accent { stroke: var(--accent); stroke-width: 1.4; }
+    .step { fill: #ffffff; stroke: var(--ink); stroke-width: 1; }
+    .step.focal { fill: var(--accent-tint); stroke: var(--accent); stroke-width: 1.2; }
+    .step.optional { fill: rgba(45,49,66,0.02); stroke: rgba(45,49,66,0.30); stroke-dasharray: 4 3; }
+    .step.input { fill: rgba(79,93,117,0.10); stroke: var(--soft); }
+    .ring { fill: none; stroke: var(--muted); stroke-width: 1.2; }
+    .spoke { fill: none; stroke: var(--soft); stroke-width: 1; stroke-dasharray: 5 4; }
+    .station { fill: var(--paper); stroke: var(--ink); stroke-width: 1; }
+    .station.focal { fill: var(--accent-tint); stroke: var(--accent); stroke-width: 1.2; }
+    .hub { fill: var(--ink); }
+    .hub-name { fill: var(--paper); font: 600 16px var(--sans); text-anchor: middle; }
+    .hub-sub { fill: var(--paper); opacity: 0.72; font: 400 8px var(--mono); text-anchor: middle; }
+    .cards { display: grid; grid-template-columns: 1.1fr 1fr 0.9fr; gap: 1rem; margin-top: 1.5rem; }
+    .cards.two { grid-template-columns: 1.2fr 0.8fr; }
+    .card { padding: 1.25rem; background: #fff; border: 1px solid var(--rule); border-radius: 6px; }
+    .card-eyebrow { margin-bottom: 0.5rem; color: var(--muted); font: 500 0.5rem var(--mono); letter-spacing: 0.18em; text-transform: uppercase; }
+    .card-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.875rem; padding-bottom: 0.875rem; border-bottom: 1px solid rgba(45,49,66,0.08); }
+    .card-dot { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; }
+    .card-dot.coral { background: var(--accent); } .card-dot.ink { background: var(--ink); } .card-dot.muted { background: var(--muted); }
+    .card h3 { font-size: 0.875rem; font-weight: 600; }
+    .card p, .card ul { color: var(--muted); font-size: 0.8125rem; line-height: 1.55; list-style: none; }
+    .card li { position: relative; margin-bottom: 0.3rem; padding-left: 0.875rem; }
+    .card li::before { position: absolute; left: 0; color: rgba(45,49,66,0.25); content: '—'; }
+    .card code { font: 400 0.75rem var(--mono); color: var(--ink); }
+    .footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem; margin-top: 2rem; padding-top: 1.5rem; color: var(--soft); border-top: 1px solid rgba(45,49,66,0.10); font: 400 0.72rem var(--mono); letter-spacing: 0.06em; }
+    @media (max-width: 820px) { body { padding: 2rem 1rem; } .cards, .cards.two { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header class="header">
+      <p class="eyebrow">banneret · as it works today</p>
+      <h1>How banneret works</h1>
+      <p class="subtitle">A playbook and three agent contracts, compiled into Claude Code or Codex. One session builds; sub-agents only read and check. Every rule in the playbook came from a trial run.</p>
+    </header>
+
+    <section class="figure">
+      <p class="eyebrow">Figure 1 · one /pipeline run</p>
+      <h2 class="fig">Who does what in a run</h2>
+      <div class="diagram-container">
+        <svg class="lane" viewBox="0 0 1176 476" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="run-title run-desc">
+          <title id="run-title">One /pipeline run</title>
+          <desc id="run-desc">Swimlane showing a pipeline run: the user starts it, the orchestrator session freezes the spec, optionally sends scouts, builds alone, pins a snapshot that verifiers check in parallel, fixes their findings, has a second verifier check the fix diff, and integrates.</desc>
+          <defs>
+            <marker id="run-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+            <marker id="run-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+          </defs>
+          <rect width="1176" height="476" fill="#f5f5f5"/>
+
+          <!-- Phase headers -->
+          <text x="220" y="52" class="phase">0 · SPEC</text>
+          <text x="340" y="52" class="phase">1 · SCOUT</text>
+          <text x="460" y="52" class="phase">2 · BUILD</text>
+          <text x="720" y="52" class="phase">3 · VERIFY</text>
+          <text x="960" y="52" class="phase">3B · FIX ROUND</text>
+          <text x="1080" y="52" class="phase">4 · INTEGRATE</text>
+          <g stroke="rgba(45,49,66,0.22)" stroke-width="1">
+            <line x1="164" y1="60" x2="276" y2="60"/>
+            <line x1="284" y1="60" x2="396" y2="60"/>
+            <line x1="404" y1="60" x2="516" y2="60"/>
+            <line x1="544" y1="60" x2="896" y2="60"/>
+            <line x1="904" y1="60" x2="1016" y2="60"/>
+            <line x1="1024" y1="60" x2="1136" y2="60"/>
+          </g>
+
+          <!-- Lanes -->
+          <line x1="40" y1="72" x2="1144" y2="72" stroke="rgba(45,49,66,0.22)" stroke-width="1"/>
+          <line x1="40" y1="152" x2="1144" y2="152" stroke="rgba(45,49,66,0.10)" stroke-width="1"/>
+          <line x1="40" y1="232" x2="1144" y2="232" stroke="rgba(45,49,66,0.10)" stroke-width="1"/>
+          <line x1="40" y1="312" x2="1144" y2="312" stroke="rgba(45,49,66,0.10)" stroke-width="1"/>
+          <line x1="40" y1="392" x2="1144" y2="392" stroke="rgba(45,49,66,0.22)" stroke-width="1"/>
+          <line x1="144" y1="72" x2="144" y2="392" stroke="rgba(45,49,66,0.22)" stroke-width="1"/>
+
+          <text x="48" y="112" class="lane-label">YOU</text>
+          <text x="48" y="128" class="lane-note">OK spec changes</text>
+          <text x="48" y="192" class="lane-label">SESSION</text>
+          <text x="48" y="208" class="lane-note">the only writer</text>
+          <text x="48" y="272" class="lane-label">SCOUTS</text>
+          <text x="48" y="288" class="lane-note">read only</text>
+          <text x="48" y="352" class="lane-label">VERIFIERS</text>
+          <text x="48" y="368" class="lane-note">run, never write</text>
+
+          <!-- Arrows (drawn before boxes) -->
+          <path class="flow" d="M220 136 V168" marker-end="url(#run-arrow)"/>
+          <path class="flow" d="M276 192 H404" marker-end="url(#run-arrow)"/>
+          <path class="flow optional" d="M232 216 V264 Q232 272 240 272 H284" marker-end="url(#run-arrow)"/>
+          <path class="flow" d="M396 272 H432 Q440 272 440 264 V216" marker-end="url(#run-arrow)"/>
+          <path class="flow" d="M516 192 H544" marker-end="url(#run-arrow)"/>
+          <path class="flow accent" d="M600 216 V344 Q600 352 608 352 H664" marker-end="url(#run-arrow-accent)"/>
+          <path class="flow" d="M752 328 V200 Q752 192 760 192 H784" marker-end="url(#run-arrow)"/>
+          <path class="flow" d="M872 216 V344 Q872 352 880 352 H904" marker-end="url(#run-arrow)"/>
+          <path class="flow" d="M992 328 V200 Q992 192 1000 192 H1024" marker-end="url(#run-arrow)"/>
+
+          <!-- Arrow labels: opaque masks, 8px clear of the stroke -->
+          <rect x="304" y="172" width="72" height="12" rx="2" fill="#f5f5f5"/>
+          <text x="340" y="181" class="arrow-label">FROZEN SPEC</text>
+          <rect x="448" y="236" width="72" height="12" rx="2" fill="#f5f5f5"/>
+          <text x="484" y="245" class="arrow-label">CONCLUSIONS</text>
+          <rect x="524" y="276" width="68" height="12" rx="2" fill="#f5f5f5"/>
+          <text x="558" y="285" class="arrow-label accent">PINNED SHA</text>
+          <rect x="760" y="260" width="52" height="12" rx="2" fill="#f5f5f5"/>
+          <text x="786" y="269" class="arrow-label">FINDINGS</text>
+          <rect x="880" y="276" width="52" height="12" rx="2" fill="#f5f5f5"/>
+          <text x="906" y="285" class="arrow-label">FIX DIFF</text>
+          <rect x="1000" y="260" width="52" height="12" rx="2" fill="#f5f5f5"/>
+          <text x="1026" y="269" class="arrow-label">VERDICTS</text>
+
+          <!-- Steps -->
+          <rect class="step input" x="164" y="88" width="112" height="48" rx="6"/>
+          <text x="220" y="109" class="node-name">Start a run</text>
+          <text x="220" y="124" class="sublabel">/pipeline &lt;task&gt;</text>
+
+          <rect class="step" x="164" y="168" width="112" height="48" rx="6"/>
+          <text x="220" y="189" class="node-name">Freeze spec</text>
+          <text x="220" y="204" class="sublabel">contracts · sha256</text>
+
+          <rect class="step optional" x="284" y="248" width="112" height="48" rx="6"/>
+          <text x="340" y="269" class="node-name">Scouts</text>
+          <text x="340" y="284" class="sublabel">foreign context</text>
+
+          <rect class="step" x="404" y="168" width="112" height="48" rx="6"/>
+          <text x="460" y="189" class="node-name">Build</text>
+          <text x="460" y="204" class="sublabel">single-threaded</text>
+
+          <rect class="step focal" x="544" y="168" width="112" height="48" rx="6"/>
+          <text x="600" y="189" class="node-name focal-name">Pinned snapshot</text>
+          <text x="600" y="204" class="sublabel">full suite first</text>
+
+          <rect class="step" x="664" y="328" width="112" height="48" rx="6"/>
+          <text x="720" y="349" class="node-name">Verify round</text>
+          <text x="720" y="364" class="sublabel">spec·tests·diff·docs</text>
+
+          <rect class="step" x="784" y="168" width="112" height="48" rx="6"/>
+          <text x="840" y="189" class="node-name">Check + fix</text>
+          <text x="840" y="204" class="sublabel">probe each fix</text>
+
+          <rect class="step" x="904" y="328" width="112" height="48" rx="6"/>
+          <text x="960" y="349" class="node-name">Fix-diff check</text>
+          <text x="960" y="364" class="sublabel">old SHA → new SHA</text>
+
+          <rect class="step" x="1024" y="168" width="112" height="48" rx="6"/>
+          <text x="1080" y="189" class="node-name">Integrate</text>
+          <text x="1080" y="204" class="sublabel">suite · read · report</text>
+
+          <!-- Legend -->
+          <line x1="40" y1="416" x2="1136" y2="416" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+          <text x="40" y="436" class="lane-label" font-size="8">LEGEND</text>
+          <rect x="40" y="452" width="16" height="12" rx="2" class="step"/>
+          <text x="64" y="461" class="legend-text">Step</text>
+          <rect x="132" y="452" width="16" height="12" rx="2" class="step focal"/>
+          <text x="156" y="461" class="legend-text">What everyone verifies against</text>
+          <rect x="324" y="452" width="16" height="12" rx="2" class="step optional"/>
+          <text x="348" y="461" class="legend-text">Only when an unknown blocks</text>
+          <path class="flow" d="M504 458 H532" marker-end="url(#run-arrow)"/>
+          <text x="540" y="461" class="legend-text">Handoff (an artifact, never "the context")</text>
+          <path class="flow accent" d="M760 458 H788" marker-end="url(#run-arrow-accent)"/>
+          <text x="796" y="461" class="legend-text">Pinned by full commit SHA</text>
+        </svg>
+      </div>
+
+      <div class="cards">
+        <article class="card">
+          <p class="card-eyebrow">THE HINGE</p>
+          <div class="card-header"><span class="card-dot coral"></span><h3>Everything checks one pinned commit</h3></div>
+          <p>Before any verifier starts, the session commits, runs every test tier, and names the full SHA in each brief. Any later change makes old verdicts stale, so each fix goes to the 3b round with both SHAs and the diff between them.</p>
+        </article>
+        <article class="card">
+          <div class="card-header"><span class="card-dot ink"></span><h3>Sub-agents read and check</h3></div>
+          <ul>
+            <li>Scouts only for foreign context, never files you'll edit</li>
+            <li>Verifiers return CONFIRMED / REFUTED / PLAUSIBLE with evidence</li>
+            <li>Each gets its own <code>mktemp -d</code> copy, in the foreground</li>
+            <li>A repo's own writing agents run report-only</li>
+          </ul>
+        </article>
+        <article class="card">
+          <div class="card-header"><span class="card-dot muted"></span><h3>Integrate is never skipped</h3></div>
+          <p>Full suite with no verifier running, spec reconciled with what shipped, and one end-to-end diff read, comments included. In the last two trials that read caught defects no verifier flagged.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="figure">
+      <p class="eyebrow">Figure 2 · how the playbook changes</p>
+      <h2 class="fig">Every rule comes back from a trial</h2>
+      <div class="diagram-container">
+        <svg class="loop" viewBox="0 0 720 592" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="loop-title loop-desc">
+          <title id="loop-title">The banneret trial loop</title>
+          <desc id="loop-desc">Loop showing banneret's release cycle: compile the canonical source into a repo, run the pipeline there, write a trial report, turn it into rules in a pull request that writes back to the canonical agents and playbook, release, and compile again.</desc>
+          <defs>
+            <marker id="loop-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+            <marker id="loop-arrow-soft" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#7a8399"/></marker>
+          </defs>
+          <rect width="720" height="592" fill="#f5f5f5"/>
+
+          <!-- Clockwise ring: five arcs on the same r=220 circle around (360,316) -->
+          <path class="ring" d="M440 111.061 A220 220 0 0 1 555.411 214.933" marker-end="url(#loop-arrow)"/>
+          <path class="ring" d="M577.035 280 A220 220 0 0 1 527.108 459.091" marker-end="url(#loop-arrow)"/>
+          <path class="ring" d="M431.666 524 A220 220 0 0 1 289.470 524.388" marker-end="url(#loop-arrow)"/>
+          <path class="ring" d="M193.675 460 A220 220 0 0 1 142.772 281.184" marker-end="url(#loop-arrow)"/>
+          <path class="ring" d="M164.041 216 A220 220 0 0 1 278.883 111.500" marker-end="url(#loop-arrow)"/>
+
+          <!-- Write-back spoke: the tune PR changes the canonical source -->
+          <path class="spoke" d="M464.727 460 L401.347 372.852" marker-end="url(#loop-arrow-soft)"/>
+          <rect x="448" y="404" width="48" height="16" rx="4" fill="#f5f5f5"/>
+          <text x="472" y="416" class="arrow-label">RULES</text>
+
+          <!-- Stations, clockwise from the top -->
+          <rect class="station" x="280" y="64" width="160" height="64" rx="6"/>
+          <text x="360" y="92" class="node-name">Run /pipeline</text>
+          <text x="360" y="112" class="sublabel">a real task in a repo</text>
+
+          <rect class="station focal" x="488" y="216" width="160" height="64" rx="6"/>
+          <text x="568" y="244" class="node-name focal-name">Trial report</text>
+          <text x="568" y="264" class="sublabel">what the pipeline got wrong</text>
+
+          <rect class="station" x="408" y="460" width="160" height="64" rx="6"/>
+          <text x="488" y="488" class="node-name">Tune PR</text>
+          <text x="488" y="508" class="sublabel">one rule per commit</text>
+
+          <rect class="station" x="152" y="460" width="160" height="64" rx="6"/>
+          <text x="232" y="488" class="node-name">Release</text>
+          <text x="232" y="508" class="sublabel">tag · GitHub · npm</text>
+
+          <rect class="station" x="72" y="216" width="160" height="64" rx="6"/>
+          <text x="152" y="244" class="node-name">Compile</text>
+          <text x="152" y="264" class="sublabel">npx banneret compile</text>
+
+          <!-- Hub: the accumulated state -->
+          <rect class="hub" x="260" y="264" width="200" height="104" rx="8"/>
+          <text x="360" y="312" class="hub-name">Canonical source</text>
+          <text x="360" y="336" class="hub-sub">agents/ · playbook/</text>
+        </svg>
+      </div>
+
+      <div class="cards two">
+        <article class="card">
+          <p class="card-eyebrow">WHAT'S REALLY CODE</p>
+          <div class="card-header"><span class="card-dot coral"></span><h3>Compile is the only code; the rest is contract</h3></div>
+          <p><code>src/compile.js</code> maps each file's frontmatter to a target: <code>.claude/agents/</code> and <code>commands/pipeline.md</code> (scouts on haiku), or <code>.codex/agents/*.toml</code> plus a managed <code>AGENTS.md</code> block. Only Codex enforces read-only, through <code>sandbox_mode</code>. In Claude Code, "sub-agents never write" holds because the agent follows the prose.</p>
+        </article>
+        <article class="card">
+          <div class="card-header"><span class="card-dot muted"></span><h3>Every rule has a trial</h3></div>
+          <ul>
+            <li>reeve, lead-scoring-crm, framesmith</li>
+            <li>Each rule carries its trial-data note</li>
+            <li>Proposals that don't hold up are dropped in the PR</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span>banneret · swimlane + loop</span>
+      <span>vicmaster/banneret</span>
+    </footer>
+  </main>
+</body>
+</html>
