@@ -38,7 +38,7 @@ Full test suite, docs/spec reconciliation (does the spec still describe what shi
 
 ## Budget
 
-Before phase 0, write a budget line per phase (rough token caps; scouts and verifiers per-agent counts — default ≤3 scouts, ≤4 verifiers). **Estimate fan-out phases at 3× your first intuition**: two trials show sub-agent spend running ~3× naive estimates, so a naive number guarantees a fake overrun. After each phase, record actual spend next to the estimate. Crossing 2× the task's total: stop, report where it went, and ask whether to continue — overruns are data, silent overruns are the failure mode.
+Before phase 0, write a budget line per phase (rough token caps; scouts and verifiers per-agent counts — default ≤3 scouts, ≤4 verifiers). **Estimate fan-out phases at 3× your first intuition**: two trials show sub-agent spend running ~3× naive estimates, so a naive number guarantees a fake overrun. The phase 0 spec verifier counts as fan-out here, though it is one agent (trial data: it ran 1.35×, 1.45× and 2.4× its budget in three runs, with 12 to 14 findings each time). After each phase, record actual spend next to the estimate. Crossing 2× the task's total: stop, report where it went, and ask whether to continue — overruns are data, silent overruns are the failure mode.
 
 ## Closing report
 
