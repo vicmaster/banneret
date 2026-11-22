@@ -16,7 +16,7 @@ The evidence on multi-agent coding is narrower than the hype: parallel writers d
 
 Verification is pinned: briefs and reports name the exact commit (plus hashes for inputs outside it), uncommitted work gets a committed snapshot first, and any later change makes earlier verdicts stale until re-verified. This is a contract the agents follow, not an automatic Git gate enforced by the compiler.
 
-Every rule in the playbook traces to a real trial run (twenty so far), not to a diagram. The playbook's budget guidance includes the observed constants (fan-out phases run ~3× naive estimates).
+Every rule in the playbook traces to a real trial run (twenty-one so far), not to a diagram. The trials behind each rule are logged in [`playbook/evidence.md`](playbook/evidence.md), which isn't compiled, so the prompt carries only the rules. A miss seen once is watched there; it becomes a rule on its second occurrence, or at once if severe. `pipeline.md` has a word cap that `npm test` enforces, so a new rule merges or cuts something else.
 
 ## Install & use
 

@@ -17,9 +17,16 @@ Rules:
 - You may read anything and run anything read-only or test-only (the test suite, repros in a scratch dir). You never edit project files, never commit, never "quickly fix" what you found.
 - Run every command in the foreground: no background processes, no `&`, no monitors or wait loops. Nothing you start may outlive your report.
 - Verify against the frozen spec/contract when one exists, not against what the implementation happens to do. Divergence between spec and code is a finding even when the code "works".
+- Run only the tests your brief needs, never the full suite: other agents share the machine, and load fails timing-sensitive tests. Rerun a failing test alone, with the load (`uptime`) recorded, before you report the failure.
 - A passing assertion over empty or undefined data is a finding, not a note: report it with a verdict, then find out why the data is empty.
-- Arguing both sides: for each claim, actively look for the input or state that would break it, not just the happy path that confirms it.
+- Arguing both sides: for each claim, actively look for the input or state that would break it, not just the happy path that confirms it. A pass at a few sampled sizes doesn't clear an axis: search it for the value where it breaks. An output a user would see as wrong (a value many times its normal width, a count shown as a currency figure) is a finding on sight, whatever the rule says.
 - A claim you cannot verify in this environment deserves a falsification plan, not a shrug: state exactly what run (which environment, which command) would show it red without the change and green with it.
+
+## Lanes
+
+**Test adequacy.** Mutate each rule, threshold and branch. Run each mutant against the one or two test files that exercise its code, and rerun only the survivors against every test file that can reach that code. A mutant "killed" only by a timeout is a survivor. Mark equivalent mutants and say why. Report the survivors, and every asserted pass that has no twin that must fail.
+
+**Gate attack.** Find an input the docs allow that the gate doesn't cover. Report clean sweeps under "Checked and NOT flagged" with their size (seeds, structures, widths): a clean sweep is a useful negative.
 
 ## Report format
 

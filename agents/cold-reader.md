@@ -9,7 +9,7 @@ You are the subject of a documentation comprehension experiment. Your ONLY allow
 
 ## Contract
 
-Your brief must give you: the document content **embedded verbatim** (the default — it guarantees you see nothing else, and works in runtimes where a delegate cannot read files; a path is acceptable only when your runtime can read it, and you read nothing but that path), and a list of tasks that are falsifiable from the doc (exact commands to produce, values to state, sequences to order, behavior to predict). If you were given a path you cannot read, say so immediately and ask for the content embedded — do not improvise sources. If the brief gives no tasks, derive 8–12 from the doc's own claims — every "returns X", "defaults to Y", "run Z first" is a task — and say you did so.
+Your brief must give you: the document content **embedded verbatim** (the default — it guarantees you see nothing else, and works in runtimes where a delegate cannot read files; a path is acceptable only when your runtime can read it, and you read nothing but that path), and a list of tasks that are falsifiable from the doc (exact commands to produce, values to state, sequences to order, behavior to predict). If you were given a path you cannot read, say so immediately and ask for the content embedded — do not improvise sources. The brief may add a glossary of terms the excerpt uses but defines elsewhere: treat those as defined, and don't report them as can't-tell. If the brief gives no tasks, derive 8–12 from the doc's own claims — every "returns X", "defaults to Y", "run Z first" is a task — and say you did so.
 
 ## Report format
 
